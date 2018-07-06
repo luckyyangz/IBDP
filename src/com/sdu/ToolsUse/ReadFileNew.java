@@ -1,0 +1,476 @@
+package com.sdu.ToolsUse;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.experimental.theories.DataPoint;
+
+import com.csvreader.CsvReader;
+import com.sdu.entity.DataNew;
+
+public class ReadFileNew {
+	public static final String EMPTY = "";
+	public static final String POINT = ".";
+	public static final String OFFICE_EXCEL_2003_POSTFIX = "xls";
+	public static final String OFFICE_EXCEL_2010_POSTFIX = "xlsx";
+	public static final String NOT_EXCEL_FILE = " : Not the Excel file!";
+	
+	public static List<DataNew> readtxt(String filePath) throws Exception{
+		List<DataNew> list=new ArrayList<DataNew>();
+		list.clear();
+		//放每一行的每一个列值
+		String data = "";
+		CsvReader reader = new CsvReader(filePath, '，', Charset.forName("GBK"));
+		//循环每一行
+		//while (reader.readRecord()) {
+		int sizeTemp = 0;
+		for(int rowNum = 0; reader.readRecord(); rowNum++){
+			
+				sizeTemp = sizeTemp + 1 ;
+				DataNew vo = new DataNew();
+				vo.setLineNo(rowNum);
+				//循环列
+				List<String> dataList = new ArrayList<String>();
+				for(int i=0;;i++){
+					data = reader.get(i);
+					if(data == ""){
+						
+						break;
+					}
+					dataList.add(data);
+					//System.out.println(data);
+				}
+				vo.setData(dataList);
+				list.add(vo);
+			}
+		
+		return list;
+	}
+	
+	public static int txtlen(String filePath) throws Exception{
+		int colnum = 0;
+		int coltem = 0;
+		CsvReader reader = new CsvReader(filePath, '，', Charset.forName("GBK"));
+		//放每一行的每一个列值
+		String data = "";
+		int sizeTemp = 0;
+		for(int rowNum = 0; reader.readRecord(); rowNum++){
+				sizeTemp = sizeTemp + 1 ;
+				
+				for(int i=0;;i++){
+					data = reader.get(i);
+					String[] split = data.split(",");
+					coltem = split.length;
+					if(data == ""){
+						break;
+					}
+				}
+				
+				if(coltem > colnum){
+					colnum = coltem;
+				}
+			}
+//		System.out.println(colnum);
+		return colnum;
+	}
+	
+	public static List<DataNew> readcsv(String filePath) throws Exception{
+		List<DataNew> list=new ArrayList<DataNew>();
+		list.clear();
+		//放每一行的每一个列值
+		String data = "";
+		CsvReader reader = new CsvReader(filePath, ',', Charset.forName("GBK"));
+		
+		//循环每一行
+		//while (reader.readRecord()) {
+		int sizeTemp = 0;
+		int sizeFirstRow=0;
+		for(int rowNum = 0; reader.readRecord(); rowNum++){
+				sizeTemp = sizeTemp + 1 ;
+				DataNew vo = new DataNew();
+				vo.setLineNo(rowNum);
+				//循环列
+				List<String> dataList = new ArrayList<String>();
+				for(int i=0;;i++){
+					data = reader.get(i);
+					if (data == "") {
+						if (i<=sizeFirstRow) {
+							data = "NA";
+						}else {
+							break;
+						}
+						
+					}
+					
+					dataList.add(data);
+					
+					//System.out.println(data);
+				}
+				if (rowNum==0) {
+					sizeFirstRow=dataList.size();
+				}
+				vo.setData(dataList);
+				list.add(vo);
+			}
+
+		return list;
+	}
+
+	public static int csvlen(String filePath) throws Exception{
+		int colnum = 0;
+		int coltem = 0;
+		CsvReader reader = new CsvReader(filePath, '，', Charset.forName("GBK"));
+		//放每一行的每一个列值
+		String data = "";
+		int sizeTemp = 0;
+		for(int rowNum = 0; reader.readRecord(); rowNum++){
+				sizeTemp = sizeTemp + 1 ;
+				
+				for(int i=0;;i++){
+					data = reader.get(i);
+					String[] split = data.split(",");
+					coltem = split.length;
+					if(coltem > colnum){
+						colnum = coltem;
+					}
+					if(data == ""){
+						break;
+					}
+				}
+				
+			}
+		System.out.println(colnum);
+		return colnum;
+	}
+	
+	public static List<DataNew> readexcel(String path) throws IOException {
+		String postfix = getPostfix(path);
+		if (!EMPTY.equals(postfix)) {
+			if (OFFICE_EXCEL_2003_POSTFIX.equals(postfix)) {
+				try {
+					return readxls(path);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else if (OFFICE_EXCEL_2010_POSTFIX.equals(postfix)) {
+				return readxlsx(path);
+			}
+		} else {
+			//System.out.println(path + NOT_EXCEL_FILE);
+		}
+		return null;
+	}
+	
+	public static int excellen(String path) throws IOException {
+		String postfix = getPostfix(path);
+		if (!EMPTY.equals(postfix)) {
+			if (OFFICE_EXCEL_2003_POSTFIX.equals(postfix)) {
+				try {
+					return xlslen(path);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else if (OFFICE_EXCEL_2010_POSTFIX.equals(postfix)) {
+				return xlsxlen(path);
+			}
+		} else {
+			//System.out.println(path + NOT_EXCEL_FILE);
+		}
+		return 0;
+	}
+	
+	public static String getPostfix(String path) {
+		if (path == null || EMPTY.equals(path.trim())) {
+			return EMPTY;
+		}
+		if (path.contains(POINT)) {
+			return path.substring(path.lastIndexOf(POINT) + 1, path.length());
+		}
+		return EMPTY;
+	}
+	
+	public static List<DataNew> readxlsx(String path) throws IOException {
+		List<DataNew> list = new ArrayList<DataNew>();
+		list.clear();
+		File excelFile = new File(path);  
+        XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(excelFile));  
+        XSSFSheet xssfSheet = wb.getSheetAt(0);
+		// 循环行Row     
+        for(int rowNum = 0; rowNum <= xssfSheet.getLastRowNum(); rowNum++ ){    
+          XSSFRow xssfRow = xssfSheet.getRow( rowNum); 
+          DataNew vo = new DataNew();
+		  vo.setLineNo(rowNum+1);
+          if(xssfRow == null){    
+            continue;    
+          }    
+          // 循环列Cell  
+          List<String> dataList = new ArrayList<String>();
+          for(int cellNum = 0; cellNum <= xssfRow.getLastCellNum(); cellNum++){    
+            XSSFCell xssfCell = xssfRow.getCell( cellNum);    
+            if(xssfCell == null){    
+              continue;    
+            }    
+            //System.out.print("   "+getsValue(xssfCell));
+            dataList.add(getsValue(xssfCell));
+          }     
+          vo.setData(dataList);
+          list.add(vo);
+        }       
+		return list;
+	}
+	
+	public static int xlsxlen(String path) throws IOException {
+		int collen=0;
+		int coltem=0;
+		InputStream is = new FileInputStream(path);
+		XSSFWorkbook xssfWorkbook = new XSSFWorkbook(is);
+		XSSFSheet xssfSheet = xssfWorkbook.getSheetAt(0);
+		// 循环行Row     
+        for(int rowNum = 0; rowNum <= xssfSheet.getLastRowNum(); rowNum++ ){    
+          XSSFRow xssfRow = xssfSheet.getRow( rowNum); 
+          if(xssfRow == null){    
+            continue;    
+          }    
+          coltem = xssfRow.getLastCellNum();
+          if(coltem>collen){
+        	  collen=coltem;
+          }
+        }      
+        System.out.println(collen);
+		return collen;
+	}
+	
+	 public static String getsValue(XSSFCell xssfCell){    
+	        if(xssfCell.getCellType() == xssfCell.CELL_TYPE_BOOLEAN){    
+	          return String.valueOf( xssfCell.getBooleanCellValue());    
+	        }else if(xssfCell.getCellType() == xssfCell.CELL_TYPE_NUMERIC){    
+	          return String.valueOf( xssfCell.getNumericCellValue());    
+	        }else{    
+	          return String.valueOf( xssfCell.getStringCellValue());    
+	        }    
+	      }    
+	
+	public static List<DataNew> readxls(String filePath) throws Exception{
+		List<DataNew> list = new ArrayList<DataNew>();
+		list.clear();
+		InputStream is = new FileInputStream(filePath);
+		HSSFWorkbook hssfWorkbook = new HSSFWorkbook(is);
+		HSSFSheet hssfSheet = hssfWorkbook.getSheetAt(0);
+		//定义存放XLS的每一行变量
+		HSSFRow hssfRow = null;
+		//定义存放每一行的每一列的值的变量
+		String currCellValue = "";
+		// 循环行所有行
+		int sizeTemp = 0;
+		for (int rowNum = 0; rowNum <= hssfSheet.getLastRowNum(); rowNum++) {
+			
+				sizeTemp = sizeTemp + 1 ;
+				hssfRow = hssfSheet.getRow(rowNum);
+				if (hssfRow == null) {
+					continue;
+				}
+				DataNew vo = new DataNew();
+				vo.setLineNo(rowNum+1);
+				//获取列数
+				int columnNum=hssfRow.getPhysicalNumberOfCells();
+				List<String> dataList = new ArrayList<String>();
+				for(int i=0;i<columnNum;i++){
+					currCellValue = printCellValue(hssfRow.getCell(i));
+					dataList.add(currCellValue);
+					//System.out.println(currCellValue);
+				}
+				vo.setData(dataList);
+				list.add(vo);
+			}
+		return list;
+	}
+	
+public static int xlslen(String fileName) throws Exception{
+		
+		int collen=0;
+		InputStream is = new FileInputStream(fileName);
+		HSSFWorkbook hssfWorkbook = new HSSFWorkbook(is);
+		HSSFSheet hssfSheet = hssfWorkbook.getSheetAt(0);
+		//定义存放XLS的每一行变量
+		HSSFRow hssfRow = null;
+		// 循环行所有行
+		int sizeTemp = 0;
+		for (int rowNum = 0; rowNum <= hssfSheet.getLastRowNum(); rowNum++) {
+			sizeTemp = sizeTemp + 1 ;
+			hssfRow = hssfSheet.getRow(rowNum);
+			if (hssfRow == null) {
+				continue;
+			}
+			//获取列数
+			int collennew=hssfRow.getPhysicalNumberOfCells();
+			if(collennew>collen){
+				collen=collennew;
+			}
+		}
+		System.out.println(collen);
+		return collen;
+	}
+	
+	//获取excel列值
+	public static String printCellValue(HSSFCell c) {
+		String cellVal = null;
+		double cellValDoub = 0.0;
+
+		if (c != null) {
+			int cellType = c.getCellType();
+
+			if (cellType == HSSFCell.CELL_TYPE_BOOLEAN) {
+				cellVal = String.valueOf(c.getBooleanCellValue());
+			} else if (cellType == HSSFCell.CELL_TYPE_STRING) {
+				cellVal = c.getRichStringCellValue().getString();
+			} else if (cellType == HSSFCell.CELL_TYPE_FORMULA) {
+
+				int type = c.getCachedFormulaResultType();
+
+				if (type == 0) {
+					cellVal = String.valueOf(c.getNumericCellValue());
+					if (cellVal.equalsIgnoreCase("NaN")) {
+						cellVal = c.getRichStringCellValue().getString();
+					} else {
+						String date = null;
+						if (HSSFDateUtil.isCellDateFormatted(c)) {
+							java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat(
+									"dd-MMM-yyyy HH:mm:ss");
+							date = formatter.format(HSSFDateUtil.getJavaDate(c
+									.getNumericCellValue()));
+							cellVal = date;
+						} else {
+							cellValDoub = c.getNumericCellValue();
+							NumberFormat df = new DecimalFormat("##.####");
+							cellVal = df.format(cellValDoub).toString();
+							// String.valueOf(c.getNumericCellValue());
+						}
+					}
+				} else if (type == 1) {
+					cellVal = c.getRichStringCellValue().getString();
+				} else {
+					cellVal = "";
+				}
+			} else if (cellType == HSSFCell.CELL_TYPE_NUMERIC) {
+				String date = null;
+				if (HSSFDateUtil.isCellDateFormatted(c)) {
+					java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+					date = formatter.format(HSSFDateUtil.getJavaDate(c
+							.getNumericCellValue()));
+					cellVal = date;
+				} else {
+					cellValDoub = c.getNumericCellValue();
+					NumberFormat df = new DecimalFormat("##");
+					cellVal = df.format(cellValDoub).toString();
+					// cellVal = String.valueOf(c.getNumericCellValue());
+				}
+			} else if (cellType == HSSFCell.CELL_TYPE_ERROR) {
+				cellVal = String.valueOf(c.getErrorCellValue());
+			} else if (cellType == HSSFCell.CELL_TYPE_BLANK) {
+				cellVal = "";
+			}
+		} else {
+			cellVal = "";
+		}
+		return cellVal.trim();
+	}
+	public static long readTextByPos(List<DataNew> list,String FileName,long pos,int lines) throws IOException{
+		RandomAccessFile raf = null;
+		//RandomAccessFile是Java中输入，输出流体系中功能最丰富的文件内容访问类，它提供很多方法来操作文件，包括读写支持，与普通的IO流相比，它最大的特别之处就是支持任意访问的方式，程序可以直接跳到任意地方来读写数据。
+        //如果我们只希望访问文件的部分内容，而不是把文件从头读到尾，使用RandomAccessFile将会带来更简洁的代码以及更好的性能。
+		//getFilePointer()：返回文件记录指针的当前位置。seek(long pos)：将文件记录指针定位到pos的位置
+		long position = -1;
+		try {
+			raf = new RandomAccessFile(new File(FileName),"r");
+			// * r 代表以只读方式打开指定文件  * rw 以读写方式打开指定文件 * rws 读写方式打开，并对内容或元数据都同步写入底层存储设备 
+            //* rwd 读写方式打开，对文件内容的更新同步更新至底层存储设备 
+			if(pos>=0 && pos<raf.length()){    
+				raf.seek(pos);//移动文件指针位置  
+				for(int i = 0;i<lines;i++){
+					String line = raf.readLine();
+					if(line==null){
+						break;
+					}
+					String lineData = new String(line.getBytes("8859_1"),"gbk");//中文乱码问题
+					String[] data = lineData.split(",");//将一行中用逗号隔开，分别放到数组中
+					DataNew temp = new DataNew();
+					List<String> sl = new ArrayList<String>();
+					for(int j = 0;j<data.length;j++){
+						sl.add(data[j]);
+					}
+					temp.setData(sl);
+					list.add(temp);
+				}
+				position = raf.getFilePointer();//返回文件记录指针的当前位置
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace(); 
+		}
+		return position;
+	}
+	public static int readExcelByPos(List<DataNew> list,String filePath,int pos,int lines){
+		int position = -1;
+		HSSFWorkbook hssf = null;
+		try {
+			hssf = new HSSFWorkbook(new FileInputStream(filePath));// 创建一个Excel文件 
+			//HSSFSheet sheet = workbook.createSheet();//创建个空白的sheet  
+			//对于在Workbook已经存在 的Sheet来说，HSSFSheet sheet = workbook.getSheet("sheet1")//读取名称为sheet1的sheet  
+           //不用Sheet名而用Sheet的序列号来取得Sheet的话，读取序号为0的sheet（第一张sheet）  
+			HSSFSheet hssfSheet = hssf.getSheetAt(0);//HSSFWorkbook：扩展名是.xls。XSSFWorkbook:扩展名是.xlsx。
+			if(pos>=0&&pos<hssfSheet.getLastRowNum()){//最后一行行标，比行数小1
+				HSSFRow hssfRow = null;
+				String currCellValue = "";
+				int sizeTemp = 0;
+				for(int rowNum = pos;rowNum<=hssfSheet.getLastRowNum();rowNum++){
+					sizeTemp = sizeTemp + 1 ;
+					hssfRow = hssfSheet.getRow(rowNum);//得到rowNum行
+					if (hssfRow == null) {
+						continue;
+					}
+					DataNew vo = new DataNew();
+					vo.setLineNo(rowNum+1);//存入行数
+					//获取列数          getLastCellNum 是获取最后一个不为空的列是第几个。 
+					int columnNum=hssfRow.getPhysicalNumberOfCells();//获取不为空的列个数。 
+					List<String> dataList = new ArrayList<String>();
+					for(int i=0;i<columnNum;i++){
+						currCellValue = printCellValue(hssfRow.getCell(i));//输出单元格的值
+						//在一个工作表里创建一个单元格，必须用「HSSFRow」类的「createCell」方法。 HSSFCell cell = row.createCell((short)2);  
+						//要读取某一行现有的单元格，使用「HSSFRow」类的「getCell」方法』。HSSFCell cell = row.getCell((short)2);  
+						dataList.add(currCellValue);
+						//System.out.println(currCellValue);
+					}
+					vo.setData(dataList);
+					list.add(vo);
+					pos = pos+lines;
+				}
+			} 
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return position;
+	}
+}
