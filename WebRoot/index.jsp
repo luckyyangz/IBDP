@@ -10,7 +10,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <html>
   <head>
     <base href="<%=basePath%>">
-    
     <title>首页</title>
 	<meta http-equiv="pragma" content="no-cache">
 	<meta http-equiv="cache-control" content="no-cache">
@@ -22,7 +21,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		<!-- bootstrap & fontawesome -->
 		<link rel="stylesheet" href="assets/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="assets/font-awesome/4.5.0/css/font-awesome.min.css" />
-
 		<!-- page specific plugin styles -->
 		<link rel="stylesheet" href="assets/css/colorbox.min.css" />
 
@@ -55,21 +53,19 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		<![endif]-->
 		<script type="text/javascript" src="jquery.js"></script>
 		<script>
-function mysubmitcheck()
-{
-if (document.getElementsByName("uploadFile")[0].value=="")
-  {
-  alert("表单内不能存在空项");
-  return false;
-  }
-  return true;
-}
+		function mysubmitcheck(){
+			if (document.getElementsByName("uploadFile")[0].value==""){
+  				alert("表单内不能存在空项");
+  				return false;
+  			}
+  			return true;
+		}
 </script>
   </head>
   <body class="no-skin">
 		 <%@include file="template.jsp" %>
 					<div class="main-container ace-save-state" id="main-container">
- 			<script type="text/javascript"> -->
+ 			<script type="text/javascript">
  				try{ace.settings.loadState('main-container')}catch(e){}
 			</script> 
 
