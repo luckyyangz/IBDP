@@ -69,7 +69,7 @@ if (document.getElementsByName("uploadFile")[0].value=="")
   <body class="no-skin">
 		 <%@include file="template.jsp" %>
 					<div class="main-container ace-save-state" id="main-container">
- 			<script type="text/javascript"> -->
+ 			<script type="text/javascript">
  				try{ace.settings.loadState('main-container')}catch(e){}
 			</script> 
 
